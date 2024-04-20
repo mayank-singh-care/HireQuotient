@@ -1,23 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import "./App.css";
+import HoldingAccordions from "./components/HoldingAccordian";
+import axios from "axios";
 
 function App() {
+  const [holdingsData, setHoldingsData] = useState([]);
+  useEffect(() => {
+    axios
+      .get("https://canopy-frontend-task.vercel.app/api/holdings")
+      .then((data) => {
+        // console.log(data.data);
+        setHoldingsData(groupData(data.data.payload));
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
+  const groupData = (data) => {
+    return Object.values(
+      data.reduce((acc, current) => {
+        acc[current.asset_class] = acc[current.asset_class] ?? [];
+        acc[current.asset_class].push(current);
+        return acc;
+      }, {})
+    );
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <HoldingAccordions holdingsData={holdingsData} />
     </div>
   );
 }
